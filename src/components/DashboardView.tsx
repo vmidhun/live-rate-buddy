@@ -42,8 +42,8 @@ interface DashboardViewProps {
   onDragEnd: (event: DragEndEvent) => void;
   displayMode: 'grid' | 'list';
   onToggleDisplayMode: () => void;
-  comparisonMode: 'base' | 'quote';
-  onToggleComparisonMode: () => void;
+  showComparison: boolean;
+  onToggleComparison: () => void;
 };
 
 export const DashboardView = ({
@@ -58,8 +58,8 @@ export const DashboardView = ({
   onDragEnd,
   displayMode,
   onToggleDisplayMode,
-  comparisonMode,
-  onToggleComparisonMode,
+  showComparison,
+  onToggleComparison,
 }: DashboardViewProps) => {
   const availableCurrencies = Object.keys(CURRENCY_NAMES).sort();
   const sensors = useSensors(
@@ -74,6 +74,8 @@ export const DashboardView = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const filteredCurrencies = currencies.filter(c => c.code !== baseCurrency);
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,7 +139,7 @@ export const DashboardView = ({
               View
             </Button>
             <Button
-              onClick={onToggleComparisonMode}
+              onClick={onToggleComparison}
               variant="outline"
               className="h-12 border-border hover:bg-secondary"
             >
@@ -156,7 +158,7 @@ export const DashboardView = ({
         </div>
 
         {/* Currency Grid / List */}
-        {currencies.length === 0 ? (
+        {filteredCurrencies.length === 0 ? (
           <div className="text-center py-16">
             <div className="inline-flex p-6 rounded-full bg-muted/50 mb-4">
               <TrendingUp className="w-12 h-12 text-muted-foreground" />
@@ -178,30 +180,30 @@ export const DashboardView = ({
             modifiers={displayMode === 'list' ? [restrictToVerticalAxis, restrictToWindowEdges] : [restrictToWindowEdges]}
           >
             <SortableContext 
-              items={currencies.map(c => c.code)} 
+              items={filteredCurrencies.map(c => c.code)} 
               strategy={displayMode === 'grid' ? rectSortingStrategy : verticalListSortingStrategy}
             >
               {displayMode === 'grid' ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {currencies.map((currency) => (
+                  {filteredCurrencies.map((currency) => (
                     <CurrencyCard
                       key={currency.code}
                       id={currency.code}
                       currency={currency}
                       baseCurrency={baseCurrency}
-                      comparisonMode={comparisonMode}
+                      showComparison={showComparison}
                     />
                   ))}
                 </div>
               ) : (
                 <div>
-                  {currencies.map((currency) => (
+                  {filteredCurrencies.map((currency) => (
                     <CurrencyRow
                       key={currency.code}
                       id={currency.code}
                       currency={currency}
                       baseCurrency={baseCurrency}
-                      comparisonMode={comparisonMode}
+                      showComparison={showComparison}
                     />
                   ))}
                 </div>
@@ -229,7 +231,7 @@ export const DashboardView = ({
         <div className="flex justify-around items-center mt-1">
           {displayMode === 'grid' && (
             <Button
-              onClick={onToggleComparisonMode}
+              onClick={onToggleComparison}
               variant="ghost"
               className="flex flex-col items-center h-auto"
             >
