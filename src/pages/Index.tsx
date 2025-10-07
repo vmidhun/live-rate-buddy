@@ -10,9 +10,11 @@ import { loadSettings, saveSettings, saveRates, loadRates as loadRatesFromCache 
 import { toast } from 'sonner';
 
 type View = 'dashboard' | 'config';
+type DisplayMode = 'grid' | 'list';
 
 const Index = () => {
   const [view, setView] = useState<View>('dashboard');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('grid');
   const [settings, setSettings] = useState<DashboardSettings>(loadSettings());
   const [rates, setRates] = useState<Record<string, number>>({});
   const [currencies, setCurrencies] = useState<CurrencyRate[]>([]);
@@ -133,6 +135,8 @@ const Index = () => {
           lastUpdated={lastUpdated}
           isDataStale={isDataStale}
           onDragEnd={handleDragEnd}
+          displayMode={displayMode}
+          onToggleDisplayMode={() => setDisplayMode(displayMode === 'grid' ? 'list' : 'grid')}
         />
       ) : (
         <ConfigurationView
