@@ -11,10 +11,12 @@ import { toast } from 'sonner';
 
 type View = 'dashboard' | 'config';
 type DisplayMode = 'grid' | 'list';
+type ComparisonMode = 'base' | 'quote';
 
 const Index = () => {
   const [view, setView] = useState<View>('dashboard');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('grid');
+  const [comparisonMode, setComparisonMode] = useState<ComparisonMode>('base');
   const [settings, setSettings] = useState<DashboardSettings>(loadSettings());
   const [rates, setRates] = useState<Record<string, number>>({});
   const [currencies, setCurrencies] = useState<CurrencyRate[]>([]);
@@ -137,6 +139,8 @@ const Index = () => {
           onDragEnd={handleDragEnd}
           displayMode={displayMode}
           onToggleDisplayMode={() => setDisplayMode(displayMode === 'grid' ? 'list' : 'grid')}
+          comparisonMode={comparisonMode}
+          onToggleComparisonMode={() => setComparisonMode(comparisonMode === 'base' ? 'quote' : 'base')}
         />
       ) : (
         <ConfigurationView

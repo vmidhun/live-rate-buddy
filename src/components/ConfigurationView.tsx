@@ -25,24 +25,23 @@ export const ConfigurationView = ({ favorites, onToggleFavorite, onBack }: Confi
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="mb-4 -ml-2 hover:bg-secondary"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
-          
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Currency Selection
+            <Button
+              variant="ghost"
+              onClick={onBack}
+              className="p-0 h-auto hover:bg-transparent"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </Button>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold">
+                Select Currencies
               </h1>
-              <p className="text-muted-foreground">
-                Choose your favorite currencies to track ({favorites.length} selected)
+              <p className="text-muted-foreground text-sm">
+                {favorites.length} selected
               </p>
             </div>
+            <div className="w-6"></div>
           </div>
 
           <div className="relative">

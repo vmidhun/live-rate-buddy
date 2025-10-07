@@ -8,9 +8,10 @@ interface CurrencyRowProps {
   id: string;
   currency: CurrencyRate;
   baseCurrency: string;
+  comparisonMode: 'base' | 'quote';
 }
 
-export const CurrencyRow = ({ id, currency, baseCurrency }: CurrencyRowProps) => {
+export const CurrencyRow = ({ id, currency, baseCurrency, comparisonMode }: CurrencyRowProps) => {
   const {
     attributes,
     listeners,
@@ -24,7 +25,8 @@ export const CurrencyRow = ({ id, currency, baseCurrency }: CurrencyRowProps) =>
     transition,
   };
 
-  const reverseRate = 1 / currency.rate;
+  const baseToQuote = currency.rate;
+  const quoteToBase = 1 / currency.rate;
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
@@ -39,11 +41,11 @@ export const CurrencyRow = ({ id, currency, baseCurrency }: CurrencyRowProps) =>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-lg font-bold text-foreground currency-rate tracking-tight">
-              {currency.rate.toFixed(4)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              1 {baseCurrency} = {currency.rate.toFixed(4)} {currency.code}
+            <p className="text-sm text-muted-foreground">
+              1 {baseCurrency} = {baseToQuote.toFixed(4)} {currency.code}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              1 {currency.code} = {quoteToBase.toFixed(4)} {baseCurrency}
             </p>
           </div>
         </div>

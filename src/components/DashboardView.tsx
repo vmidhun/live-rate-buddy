@@ -1,7 +1,7 @@
 import { CurrencyRate } from '@/types/currency';
 import { CurrencyCard } from './CurrencyCard';
 import { CurrencyRow } from './CurrencyRow';
-import { Settings, RefreshCw, TrendingUp, LayoutGrid, List } from 'lucide-react';
+import { Settings, RefreshCw, TrendingUp, LayoutGrid, List, GitCompareArrows } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -42,6 +42,8 @@ interface DashboardViewProps {
   onDragEnd: (event: DragEndEvent) => void;
   displayMode: 'grid' | 'list';
   onToggleDisplayMode: () => void;
+  comparisonMode: 'base' | 'quote';
+  onToggleComparisonMode: () => void;
 };
 
 export const DashboardView = ({
@@ -56,6 +58,8 @@ export const DashboardView = ({
   onDragEnd,
   displayMode,
   onToggleDisplayMode,
+  comparisonMode,
+  onToggleComparisonMode,
 }: DashboardViewProps) => {
   const availableCurrencies = Object.keys(CURRENCY_NAMES).sort();
   const sensors = useSensors(
@@ -121,6 +125,26 @@ export const DashboardView = ({
               Refresh
             </Button>
             <Button
+              onClick={onToggleDisplayMode}
+              variant="outline"
+              className="h-12 border-border hover:bg-secondary"
+            >
+              {displayMode === 'grid' ? (
+                <List className="w-4 h-4 mr-2" />
+              ) : (
+                <LayoutGrid className="w-4 h-4 mr-2" />
+              )}
+              View
+            </Button>
+            <Button
+              onClick={onToggleComparisonMode}
+              variant="outline"
+              className="h-12 border-border hover:bg-secondary"
+            >
+              <GitCompareArrows className="w-4 h-4 mr-2" />
+              Compare
+            </Button>
+            <Button
               onClick={onOpenConfig}
               variant="default"
               className="h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90"
@@ -165,6 +189,7 @@ export const DashboardView = ({
                       id={currency.code}
                       currency={currency}
                       baseCurrency={baseCurrency}
+                      comparisonMode={comparisonMode}
                     />
                   ))}
                 </div>
@@ -176,6 +201,7 @@ export const DashboardView = ({
                       id={currency.code}
                       currency={currency}
                       baseCurrency={baseCurrency}
+                      comparisonMode={comparisonMode}
                     />
                   ))}
                 </div>
@@ -201,6 +227,24 @@ export const DashboardView = ({
           )}
         </div>
         <div className="flex justify-around items-center mt-1">
+          {displayMode === 'grid' && (
+            <Button
+              onClick={onToggleComparisonMode}
+              variant="ghost"
+              className="flex flex-col items-center h-auto"
+            >
+              <GitCompareArrows className="w-6 h-6 mb-1" />
+              <span className="text-xs">Compare</span>
+            </Button>
+          )}
+          <Button
+            onClick={onOpenConfig}
+            variant="ghost"
+            className="flex flex-col items-center h-auto"
+          >
+            <Settings className="w-6 h-6 mb-1" />
+            <span className="text-xs">Configure</span>
+          </Button>
           <Button
             onClick={onRefresh}
             disabled={isLoading}
@@ -221,14 +265,6 @@ export const DashboardView = ({
               <LayoutGrid className="w-6 h-6 mb-1" />
             )}
             <span className="text-xs">View</span>
-          </Button>
-          <Button
-            onClick={onOpenConfig}
-            variant="ghost"
-            className="flex flex-col items-center h-auto"
-          >
-            <Settings className="w-6 h-6 mb-1" />
-            <span className="text-xs">Configure</span>
           </Button>
         </div>
       </div>
