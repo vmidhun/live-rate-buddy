@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { DashboardView } from '@/components/DashboardView';
 import { ConfigurationView } from '@/components/ConfigurationView';
 import { CurrencyRate, DashboardSettings } from '@/types/currency';
 import { CURRENCY_NAMES } from '@/data/currencyNames';
 import { fetchExchangeRates } from '@/utils/currencyApi';
-import { loadSettings, saveSettings } from '@/utils/localStorage';
+import { loadSettings, saveSettings, saveRates, loadRates as loadRatesFromCache } from '@/utils/localStorage';
 import { toast } from 'sonner';
 
 type View = 'dashboard' | 'config';
@@ -16,18 +18,37 @@ const Index = () => {
   const [currencies, setCurrencies] = useState<CurrencyRate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isDataStale, setIsDataStale] = useState(false);
 
   // Load exchange rates
-  const loadRates = async () => {
+  const loadRates = async (forceRefresh = false) => {
     setIsLoading(true);
+    const cachedData = loadRatesFromCache();
+
+    if (cachedData && !forceRefresh && cachedData.baseCurrency === settings.baseCurrency) {
+      setRates(cachedData.rates);
+      setLastUpdated(new Date(cachedData.timestamp));
+      setIsDataStale(true);
+      toast.info('Using cached exchange rates. Refresh for the latest data.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const fetchedRates = await fetchExchangeRates(settings.baseCurrency);
       setRates(fetchedRates);
       setLastUpdated(new Date());
+      saveRates(fetchedRates, settings.baseCurrency);
+      setIsDataStale(false);
       toast.success('Exchange rates updated successfully');
     } catch (error) {
       toast.error('Failed to fetch exchange rates. Using cached data if available.');
       console.error('Error loading rates:', error);
+      if (cachedData && cachedData.baseCurrency === settings.baseCurrency) {
+        setRates(cachedData.rates);
+        setLastUpdated(new Date(cachedData.timestamp));
+        setIsDataStale(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +73,30 @@ const Index = () => {
   useEffect(() => {
     loadRates();
   }, [settings.baseCurrency]);
+
+  const handleRefresh = () => {
+    loadRates(true);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setCurrencies((items) => {
+        const oldIndex = items.findIndex((item) => item.code === active.id);
+        const newIndex = items.findIndex((item) => item.code === over?.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        const newFavorites = newItems.map((item) => item.code);
+        const newSettings = { ...settings, favorites: newFavorites };
+        
+        setSettings(newSettings);
+        saveSettings(newSettings);
+        
+        return newItems;
+      });
+    }
+  };
 
   const handleBaseCurrencyChange = (newBase: string) => {
     const newSettings = { ...settings, baseCurrency: newBase };
@@ -82,10 +127,12 @@ const Index = () => {
           baseCurrency={settings.baseCurrency}
           currencies={currencies}
           onBaseCurrencyChange={handleBaseCurrencyChange}
-          onRefresh={loadRates}
+          onRefresh={handleRefresh}
           onOpenConfig={() => setView('config')}
           isLoading={isLoading}
           lastUpdated={lastUpdated}
+          isDataStale={isDataStale}
+          onDragEnd={handleDragEnd}
         />
       ) : (
         <ConfigurationView

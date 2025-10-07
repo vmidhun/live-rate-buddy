@@ -1,20 +1,37 @@
 import { CURRENCY_NAMES } from '@/data/currencyNames';
 import { CurrencyRate } from '@/types/currency';
 import { Card } from '@/components/ui/card';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface CurrencyCardProps {
+  id: string;
   currency: CurrencyRate;
   baseCurrency: string;
 }
 
-export const CurrencyCard = ({ currency, baseCurrency }: CurrencyCardProps) => {
+export const CurrencyCard = ({ id, currency, baseCurrency }: CurrencyCardProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const reverseRate = 1 / currency.rate;
 
   return (
-    <Card className="group relative overflow-hidden border border-border bg-gradient-to-br from-card to-card/50 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:scale-[1.02] aspect-square">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-2xl transform translate-x-16 -translate-y-16 transition-transform duration-500 group-hover:scale-150" />
-      
-      <div className="relative h-full flex flex-col justify-around p-4 text-center">
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Card className="group relative overflow-hidden border border-border bg-gradient-to-br from-card to-card/50 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:scale-[1.02] aspect-square">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-2xl transform translate-x-16 -translate-y-16 transition-transform duration-500 group-hover:scale-150" />
+        
+        <div className="relative h-full flex flex-col justify-around p-4 text-center">
         {/* Top half */}
         <div>
           <div className="flex items-center justify-center gap-2">
@@ -43,7 +60,8 @@ export const CurrencyCard = ({ currency, baseCurrency }: CurrencyCardProps) => {
           </div>
          
         </div>
-      </div>
-    </Card>
+        </div>
+      </Card>
+    </div>
   );
 };

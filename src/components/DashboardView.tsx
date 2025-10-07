@@ -1,6 +1,21 @@
 import { CurrencyRate } from '@/types/currency';
 import { CurrencyCard } from './CurrencyCard';
 import { Settings, RefreshCw, TrendingUp } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -19,6 +34,8 @@ interface DashboardViewProps {
   onOpenConfig: () => void;
   isLoading: boolean;
   lastUpdated: Date | null;
+  isDataStale: boolean;
+  onDragEnd: (event: DragEndEvent) => void;
 }
 
 export const DashboardView = ({
@@ -29,8 +46,16 @@ export const DashboardView = ({
   onOpenConfig,
   isLoading,
   lastUpdated,
+  isDataStale,
+  onDragEnd,
 }: DashboardViewProps) => {
   const availableCurrencies = Object.keys(CURRENCY_NAMES).sort();
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,11 +67,11 @@ export const DashboardView = ({
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Live Currency Dashboard
+              X-Change
             </h1>
           </div>
           <p className="text-muted-foreground text-lg">
-            Real-time exchange rates from around the world
+            Real-time exchange dashboard
           </p>
         </div>
 
@@ -97,12 +122,19 @@ export const DashboardView = ({
         </div>
 
         {/* Last Updated */}
-        {lastUpdated && (
-          <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </div>
-        )}
+        <div className="flex justify-between items-center mb-6">
+          {lastUpdated && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className={`w-2 h-2 rounded-full ${isDataStale ? 'bg-amber-500' : 'bg-accent'} animate-pulse`} />
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </div>
+          )}
+          {isDataStale && (
+            <div className="text-sm text-amber-500 font-medium">
+              Cached data is being shown. Refresh for the latest rates.
+            </div>
+          )}
+        </div>
 
         {/* Currency Grid */}
         {currencies.length === 0 ? (
@@ -120,15 +152,24 @@ export const DashboardView = ({
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {currencies.map((currency) => (
-              <CurrencyCard
-                key={currency.code}
-                currency={currency}
-                baseCurrency={baseCurrency}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext items={currencies.map(c => c.code)} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {currencies.map((currency) => (
+                  <CurrencyCard
+                    key={currency.code}
+                    id={currency.code}
+                    currency={currency}
+                    baseCurrency={baseCurrency}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>
