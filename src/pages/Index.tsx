@@ -17,6 +17,7 @@ const Index = () => {
   const [displayMode, setDisplayMode] = useState<DisplayMode>('grid');
   const [showComparison, setShowComparison] = useState<boolean>(false);
   const [settings, setSettings] = useState<DashboardSettings>(loadSettings());
+  const [amount, setAmount] = useState<number>(1);
   const [rates, setRates] = useState<Record<string, number>>({});
   const [currencies, setCurrencies] = useState<CurrencyRate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,6 +124,10 @@ const Index = () => {
     );
   };
 
+  const handleAmountChange = (newAmount: number) => {
+    setAmount(newAmount);
+  };
+
   return (
     <>
       {view === 'dashboard' ? (
@@ -140,6 +145,8 @@ const Index = () => {
           onToggleDisplayMode={() => setDisplayMode(displayMode === 'grid' ? 'list' : 'grid')}
           showComparison={showComparison}
           onToggleComparison={() => setShowComparison(!showComparison)}
+          amount={amount}
+          onAmountChange={handleAmountChange}
         />
       ) : (
         <ConfigurationView

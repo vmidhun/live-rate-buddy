@@ -9,9 +9,10 @@ interface CurrencyCardProps {
   currency: CurrencyRate;
   baseCurrency: string;
   showComparison: boolean;
+  amount: number;
 }
 
-export const CurrencyCard = ({ id, currency, baseCurrency, showComparison }: CurrencyCardProps) => {
+export const CurrencyCard = ({ id, currency, baseCurrency, showComparison, amount }: CurrencyCardProps) => {
   const {
     attributes,
     listeners,
@@ -40,7 +41,7 @@ export const CurrencyCard = ({ id, currency, baseCurrency, showComparison }: Cur
           <div className="flex-1 flex flex-col justify-center items-center p-1">
            
             <div className="text-sm text-foreground tracking-tight">
-              1.00
+              {amount.toFixed(2)}
             </div>
             <div className="flex items-center gap-1">
               <span className="text-xl text-foreground">{bottomCurrency}</span>
@@ -55,7 +56,7 @@ export const CurrencyCard = ({ id, currency, baseCurrency, showComparison }: Cur
           {/* Bottom half */}
           <div className="flex-1 flex flex-col justify-center items-center p-1">
            <div className="text-2xl font-bold text-foreground tracking-tight">
-              {displayRate.toFixed(4)}
+              {(displayRate * amount).toFixed(4)}
             </div> 
             <div className="flex items-center gap-1">
               <span className="text-xl text-foreground">{topCurrency}</span>

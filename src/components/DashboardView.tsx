@@ -21,6 +21,8 @@ import {
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -31,6 +33,8 @@ import {
 import { CURRENCY_NAMES } from '@/data/currencyNames';
 
 interface DashboardViewProps {
+  amount: number;
+  onAmountChange: (amount: number) => void;
   baseCurrency: string;
   currencies: CurrencyRate[];
   onBaseCurrencyChange: (currency: string) => void;
@@ -47,6 +51,8 @@ interface DashboardViewProps {
 };
 
 export const DashboardView = ({
+  amount,
+  onAmountChange,
   baseCurrency,
   currencies,
   onBaseCurrencyChange,
@@ -93,24 +99,37 @@ export const DashboardView = ({
           <p className="text-muted-foreground text-md">
             Real-time exchange dashboard
           </p>
-          <div className="mt-4">
-            <Select value={baseCurrency} onValueChange={onBaseCurrencyChange}>
-              <SelectTrigger className="h-12 bg-card border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border max-h-[300px]">
-                {availableCurrencies.map((code) => (
-                  <SelectItem key={code} value={code}>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold">{code}</span>
-                      <span className="text-muted-foreground text-sm">
-                        - {CURRENCY_NAMES[code]}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="hidden sm:flex mt-4 gap-4">
+            <div className="w-1/2">
+              <Select value={baseCurrency} onValueChange={onBaseCurrencyChange}>
+                <SelectTrigger className="h-12 bg-card border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border max-h-[300px]">
+                  {availableCurrencies.map((code) => (
+                    <SelectItem key={code} value={code}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold">{code}</span>
+                        <span className="text-muted-foreground text-sm">
+                          - {CURRENCY_NAMES[code]}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-1/2">
+              <Label htmlFor="amount-input" className="sr-only">Amount</Label>
+              <Input
+                id="amount-input"
+                type="number"
+                value={amount}
+                onChange={(e) => onAmountChange(Number(e.target.value))}
+                placeholder="Amount"
+                className="h-12 bg-card border-border"
+              />
+            </div>
           </div>
         </div>
 
@@ -192,6 +211,7 @@ export const DashboardView = ({
                       currency={currency}
                       baseCurrency={baseCurrency}
                       showComparison={showComparison}
+                      amount={amount}
                     />
                   ))}
                 </div>
@@ -204,6 +224,7 @@ export const DashboardView = ({
                       currency={currency}
                       baseCurrency={baseCurrency}
                       showComparison={showComparison}
+                      amount={amount}
                     />
                   ))}
                 </div>
@@ -215,6 +236,38 @@ export const DashboardView = ({
 
       {/* Sticky Footer for Mobile */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border p-2 z-10">
+        <div className="flex gap-2 mb-2">
+          <div className="w-1/2">
+            <Select value={baseCurrency} onValueChange={onBaseCurrencyChange}>
+              <SelectTrigger className="h-12 bg-card border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border max-h-[300px]">
+                {availableCurrencies.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">{code}</span>
+                      <span className="text-muted-foreground text-sm">
+                        - {CURRENCY_NAMES[code]}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-1/2">
+            <Label htmlFor="amount-input-mobile" className="sr-only">Amount</Label>
+            <Input
+              id="amount-input-mobile"
+              type="number"
+              value={amount}
+              onChange={(e) => onAmountChange(Number(e.target.value))}
+              placeholder="Amount"
+              className="h-12 bg-card border-border"
+            />
+          </div>
+        </div>
         <div className="flex flex-col items-center text-center">
           {lastUpdated && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -229,16 +282,14 @@ export const DashboardView = ({
           )}
         </div>
         <div className="flex justify-around items-center mt-1">
-          {displayMode === 'grid' && (
-            <Button
-              onClick={onToggleComparison}
-              variant="ghost"
-              className="flex flex-col items-center h-auto"
-            >
-              <GitCompareArrows className="w-6 h-6 mb-1" />
-              <span className="text-xs">Compare</span>
-            </Button>
-          )}
+          <Button
+            onClick={onToggleComparison}
+            variant="ghost"
+            className="flex flex-col items-center h-auto"
+          >
+            <GitCompareArrows className="w-6 h-6 mb-1" />
+            <span className="text-xs">Compare</span>
+          </Button>
           <Button
             onClick={onOpenConfig}
             variant="ghost"

@@ -9,9 +9,10 @@ interface CurrencyRowProps {
   currency: CurrencyRate;
   baseCurrency: string;
   showComparison: boolean;
+  amount: number;
 }
 
-export const CurrencyRow = ({ id, currency, baseCurrency, showComparison }: CurrencyRowProps) => {
+export const CurrencyRow = ({ id, currency, baseCurrency, showComparison, amount }: CurrencyRowProps) => {
   const {
     attributes,
     listeners,
@@ -43,11 +44,11 @@ export const CurrencyRow = ({ id, currency, baseCurrency, showComparison }: Curr
           <div className="text-right">
             {showComparison ? (
               <p className="text-md font-bold text-foreground">
-                1 {currency.code} = {quoteToBase.toFixed(4)} {baseCurrency}
+                {amount.toFixed(2)} {currency.code} = {(quoteToBase * amount).toFixed(4)} {baseCurrency}
               </p>
             ) : (
               <p className="text-md font-bold text-foreground">
-                1 {baseCurrency} = {baseToQuote.toFixed(4)} {currency.code}
+                {amount.toFixed(2)} {baseCurrency} = {(baseToQuote * amount).toFixed(4)} {currency.code}
               </p>
             )}
           </div>
